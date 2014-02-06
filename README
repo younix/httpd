@@ -25,4 +25,7 @@ project is, to write a daemon that just implements one protocol.
  * simpler source code
  * lesser maintenance
 
-# vim: syntax=markdown spell spelllang=en:
+## references
+ * http://cr.yp.to/proto/ucspi.txt
+
+vim: syntax=markdown spell spelllang=en:
