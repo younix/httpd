@@ -2,7 +2,7 @@
 
 httpd is a simple web server which only does HTTP.  This is just a research
 project for tiny programs and Unix way of live.  The main idea behind this
-project is, to write a daemon that just implements one protocol.
+project is, to write a daemon that just implements the handling one protocol.
 
 ## Don'ts:
  * no IPv4 and IPv6
