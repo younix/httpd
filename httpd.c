@@ -147,11 +147,14 @@ main(void)
  err:
 	if (errcode != 0) {
 		regerror(errcode, NULL, errbuf, BUFSIZ);
+		error_response(400, "Bad Request");
 		fprintf(stderr, "%s\n", errbuf);
 	}
 
-	if (errno != 0)
+	if (errno != 0) {
+		error_response(500, "Internal Server Error");
 		perror(NULL);
+	}
 
 	return EXIT_FAILURE;
 }
