@@ -1,7 +1,9 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include <limits.h>
 #include <regex.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,9 +22,35 @@
 		pmatch[(pos)].rm_eo - pmatch[(pos)].rm_so))
 
 static void
-error_response(int err_code, char *err_str)
+error_response(int err_code, char *err_str, struct mesg_head *mesg_head)
 {
+	struct mesg *m;
+
+	printf("HTTP/1.1 %d %s\r\n", err_code, err_str);
+	TAILQ_FOREACH(m, mesg_head, listp) {
+		printf("%s: %s\r\n", m->name, m->value);
+	}
+	printf("\r\n"); /* end of http response header */
 	printf(ERR_DOCUMENT, err_code, err_str, err_code, err_str);
+}
+
+static bool
+auth(char *path_file, struct mesg_head *mesg_head)
+{
+	struct stat stat_file;
+	struct stat stat_dir;
+	char *path_dir = dirname(path_file);
+
+	stat(path_dir, &stat_dir);
+	stat(path_file, &stat_file);
+
+	/* is file protected? */
+	if (stat_dir.st_mode & S_IROTH && stat_file.st_mode & S_IROTH)
+		return true;
+
+	/* TODO: Add authentication here! */
+
+	return false;
 }
 
 void
@@ -33,6 +61,10 @@ method_get(struct req *req, struct mesg_head *mesg_head)
 	char path[PATH_MAX] = "";
 	char buf[BUFSIZ];
 	ssize_t len = 0;
+	struct mesg_head resp_head;
+
+	/* prepare http response header */
+	TAILQ_INIT(&resp_head);
 
 	fprintf(stderr, "file: %s\n", req->uri);
 
@@ -42,6 +74,13 @@ method_get(struct req *req, struct mesg_head *mesg_head)
 
 	strlcpy(path, DOCUMENT_ROOT, sizeof path);
 	strlcat(path, req->uri, sizeof path);
+
+	if (auth(path, mesg_head) == false) {
+		add_header_field(&resp_head, strdup("WWW-Authenticate"),
+		    strdup("Basic realm=\"authenticate\""));
+		error_response(401, "Unauthorized", &resp_head);
+		return;
+	}
 
 	stat(path, &path_stat);
 	if (S_ISDIR(path_stat.st_mode)) {
@@ -57,6 +96,8 @@ method_get(struct req *req, struct mesg_head *mesg_head)
 		close(fd);
 	} else
 		fprintf(stderr, "path: '%s' is nothing!\n", path);
+
+	free_head(&resp_head);
 }
 
 static int
@@ -141,18 +182,18 @@ main(void)
 	if (strcmp(req.method, "GET") == 0)
 		method_get(&req, &mesg_head);
 	else
-		error_response(501, "Not Implemented");
+		error_response(501, "Not Implemented", NULL);
 
 	return EXIT_SUCCESS;
  err:
 	if (errcode != 0) {
 		regerror(errcode, NULL, errbuf, BUFSIZ);
-		error_response(400, "Bad Request");
+		error_response(400, "Bad Request", NULL);
 		fprintf(stderr, "%s\n", errbuf);
 	}
 
 	if (errno != 0) {
-		error_response(500, "Internal Server Error");
+		error_response(500, "Internal Server Error", NULL);
 		perror(NULL);
 	}
 

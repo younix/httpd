@@ -37,6 +37,20 @@ struct mesg {
 
 TAILQ_HEAD(mesg_head, mesg);
 
+#define add_header_field(header, name_, value_) do {			\
+		struct mesg *mesg = malloc(sizeof *mesg);		\
+		mesg->name = (name_);					\
+		mesg->value = (value_);					\
+		TAILQ_INSERT_TAIL((header), mesg, listp); } while (0)
+
+#define free_head(head)						\
+		while ((m = TAILQ_FIRST(head))) {		\
+			TAILQ_REMOVE(head, m, listp);	\
+			free(m->name);				\
+			free(m->value);				\
+			free(m);				\
+		}
+
 /* html documents */
 #define ERR_DOCUMENT		\
 	"<!DOCTYPE html>\n"	\
