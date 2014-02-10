@@ -27,5 +27,7 @@ project is, to write a daemon that just implements the handling one protocol.
 
 ## references
  * http://cr.yp.to/proto/ucspi.txt
+ * [RFC: Hypertext Transfer Protocol](http://tools.ietf.org/html/rfc2616)
+ * [RFC: HTTP Authentication](http://tools.ietf.org/html/rfc2617)
 
 vim: syntax=markdown spell spelllang=en:
