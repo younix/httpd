@@ -61,6 +61,8 @@ auth(char *path_file, struct mesg_head *mesg_head)
 	TAILQ_FOREACH(m, mesg_head, listp) {
 		if (strcmp(m->name, "Authorization") == 0) {
 			/* XXX: repaire this hack! */
+			/* XXX: Be sure to delete the password in memory
+			 * XXX: before starting an cgi script! */
 			char *code = m->value;
 			strsep(&code, " ");
 			code = strsep(&code, "\r");
