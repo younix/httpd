@@ -1,4 +1,4 @@
-CFLAGS=-std=c99 -pedantic -Wall -Wextra
+CFLAGS=-std=c99 -pedantic -Wall -Wextra -static
 
 all: httpd list-dir
 
