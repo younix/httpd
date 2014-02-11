@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
+#include <login_cap.h>
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -13,8 +14,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <bsd_auth.h>
+
 #include "httpd.h"
 #include "config.h"
+#include "base64.h"
 
 #define get_regex_match(buf, pmatch, pos) (			\
 	(pmatch)[(pos)].rm_so == -1 ? NULL :			\
@@ -37,9 +41,14 @@ error_response(int err_code, char *err_str, struct mesg_head *mesg_head)
 static bool
 auth(char *path_file, struct mesg_head *mesg_head)
 {
+	struct mesg *m;
 	struct stat stat_file;
 	struct stat stat_dir;
 	char *path_dir = dirname(path_file);
+	char *user = NULL;
+	char *pass = NULL;
+	unsigned char buf[BUFSIZ];
+	size_t buf_len = BUFSIZ;
 
 	stat(path_dir, &stat_dir);
 	stat(path_file, &stat_file);
@@ -48,7 +57,25 @@ auth(char *path_file, struct mesg_head *mesg_head)
 	if (stat_dir.st_mode & S_IROTH && stat_file.st_mode & S_IROTH)
 		return true;
 
-	/* TODO: Add authentication here! */
+	/* parse and decode username and password */
+	TAILQ_FOREACH(m, mesg_head, listp) {
+		if (strcmp(m->name, "Authorization") == 0) {
+			/* XXX: repaire this hack! */
+			char *code = m->value;
+			strsep(&code, " ");
+			code = strsep(&code, "\r");
+			base64decode(code, strlen(code), buf, &buf_len);
+			buf[buf_len] = '\0';
+			pass = (char *) buf;
+			user = strsep(&pass, ":");
+
+			if (user == NULL || pass == NULL)
+				return false;
+
+			if (auth_userokay(user, NULL, NULL, pass) != 0)
+				return true;
+		}
+	}
 
 	return false;
 }
@@ -69,7 +96,7 @@ method_get(struct req *req, struct mesg_head *mesg_head)
 	fprintf(stderr, "file: %s\n", req->uri);
 
 	TAILQ_FOREACH(m, mesg_head, listp) {
-		fprintf(stderr, "head: %s\n", m->name);
+		fprintf(stderr, "head: %s:%s\n", m->name, m->value);
 	}
 
 	strlcpy(path, DOCUMENT_ROOT, sizeof path);
@@ -128,6 +155,7 @@ read_header(struct mesg_head *mesg_head, FILE *fh)
 	}
 
 	fprintf(stderr, "end of header!\n");
+	free(pmatch);
 
 	return 0;
 }
@@ -155,6 +183,7 @@ read_request(struct req *req, FILE *fh)
 
 	fprintf(stderr, "req: '%s'", buf);
 
+	free(pmatch);
 	return 0;
 }
 

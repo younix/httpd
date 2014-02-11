@@ -22,8 +22,8 @@ struct req {
 };
 
 /* http header message strings */
-#define MESSAGE_NAME "([[:alnum:]]+)"
-#define MESSAGE_VALUE "([^[:space:]]*)[ ]*"
+#define MESSAGE_NAME "([[:alnum:]-]+)"
+#define MESSAGE_VALUE "([^\r\n]*)"
 
 #define HEADER_MESSAGE "^" MESSAGE_NAME ":" "[ ]*" MESSAGE_VALUE CRLF "$"
 
@@ -31,7 +31,7 @@ struct mesg {
 	char *name;
 #define MSG_POS_NAME 1
 	char *value;
-#define MSG_POS_VALUE 3
+#define MSG_POS_VALUE 2
 	TAILQ_ENTRY(mesg) listp;
 };
 
@@ -45,11 +45,14 @@ TAILQ_HEAD(mesg_head, mesg);
 
 #define free_head(head)						\
 		while ((m = TAILQ_FIRST(head))) {		\
-			TAILQ_REMOVE(head, m, listp);	\
+			TAILQ_REMOVE(head, m, listp);		\
 			free(m->name);				\
 			free(m->value);				\
 			free(m);				\
 		}
+
+/* http authentication */
+#define MESSAGE_AUTH "$Basic" "[ ]+" "([[:alnum:]+/=]+)"
 
 /* html documents */
 #define ERR_DOCUMENT		\
