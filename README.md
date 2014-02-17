@@ -35,7 +35,7 @@ project is, to write a daemon that just implements the handling one protocol.
 | Method  | Supported |
 |---------|-----------|
 | OPTIONS | no        |
-| GET     | yes       |
+| GET     | **yes**   |
 | HEAD    | no        |
 | POST    | no        |
 | PUT     | no        |
@@ -79,7 +79,7 @@ project is, to write a daemon that just implements the handling one protocol.
 | Retry-After         | no            |
 | Server              | no            |
 | Vary                | no            |
-| WWW-Authenticate    | no            |
+| WWW-Authenticate    | **yes**       |
 
 ## http entry header features
 
