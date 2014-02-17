@@ -97,10 +97,6 @@ method_get(struct req *req, struct mesg_head *mesg_head)
 
 	fprintf(stderr, "file: %s\n", req->uri);
 
-	TAILQ_FOREACH(m, mesg_head, listp) {
-		fprintf(stderr, "head: %s:%s\n", m->name, m->value);
-	}
-
 	strlcpy(path, DOCUMENT_ROOT, sizeof path);
 	strlcat(path, req->uri, sizeof path);
 
