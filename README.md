@@ -32,25 +32,69 @@ project is, to write a daemon that just implements the handling one protocol.
 
 ## http features
 
-| Method | Support |
-|--------|---------|
-| OPTIONS| no      |
-| GET    | yes     |
-| HEAD   | no      |
-| POST   | no      |
-| PUT    | no      |
-| DELETE | no      |
-| TRACE  | no      |
-| CONNECT| no      |
+| Method  | Supported |
+|---------|-----------|
+| OPTIONS | no        |
+| GET     | yes       |
+| HEAD    | no        |
+| POST    | no        |
+| PUT     | no        |
+| DELETE  | no        |
+| TRACE   | no        |
+| CONNECT | no        |
 
-## http header features
+## http request header features
 
-| Header Field   | Supported |
-|----------------|-----------|
-| range          | no        |
-| authentication | yes       |
-| content-length | no        |
-| content-type   | no        |
+| Header Field        | Status        |
+|---------------------|---------------|
+| Accept              | ignored       |
+| Accept-Charset      | ignored       |
+| Accept-Encoding     | ignored       |
+| Accept-Language     | ignored       |
+| Authorization       | **supported** |
+| Expect              | ignored       |
+| From                | ignored       |
+| Host                | ignored       |
+| If-Match            | ignored       |
+| If-Modified-Since   | ignored       |
+| If-None-Match       | ignored       |
+| If-Range            | ignored       |
+| If-Unmodified-Since | ignored       |
+| Max-Forwards        | ignored       |
+| Proxy-Authorization | ignored       |
+| Range               | ignored       |
+| Referer             | ignored       |
+| TE                  | ignored       |
+| User-Agent          | ignored       |
+
+## http response header features
+
+| Header Field        | Supported     |
+|---------------------|---------------|
+| Accept-Ranges       | no            |
+| Age                 | no            |
+| ETag                | no            |
+| Location            | no            |
+| Proxy-Authenticate  | no            |
+| Retry-After         | no            |
+| Server              | no            |
+| Vary                | no            |
+| WWW-Authenticate    | no            |
+
+## http entry header features
+
+| Header Field        | Supported     |
+|---------------------|---------------|
+| Allow               | no            |
+| Content-Encoding    | no            |
+| Content-Language    | no            |
+| Content-Length      | no            |
+| Content-Location    | no            |
+| Content-MD5         | no            |
+| Content-Range       | no            |
+| Content-Type        | no            |
+| Expires             | no            |
+| Last-Modified       | no            |
 
 ## references
  * http://cr.yp.to/proto/ucspi.txt
