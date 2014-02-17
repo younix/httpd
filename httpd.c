@@ -124,7 +124,6 @@ cgi(struct req *req, struct mesg_head *mesg_head, char *path)
 	COPY_ENV_VAR("TCPREMOTEPORT", "REMOTE_PORT");
 
 	TAILQ_FOREACH(m, mesg_head, listp) {
-#define FIELD_LENGTH 64
 		char *env_var = NULL;
 		asprintf(&env_var, "HTTP_%s=%s", strtoupper(m->name), m->value);
 		putenv(env_var);
