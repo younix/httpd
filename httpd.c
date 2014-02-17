@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <libgen.h>
@@ -74,22 +75,61 @@ auth(char *path_file, struct mesg_head *mesg_head)
 			if (user == NULL || pass == NULL)
 				return false;
 
-			if (auth_userokay(user, NULL, NULL, pass) != 0)
+			if (auth_userokay(user, NULL, NULL, pass) != 0) {
+				/* env. variables may used by CGI scripts */
+				setenv("AUTH_TYPE", "Basic", 1);
+				setenv("REMOTE_USER", user, 1);
 				return true;
+			}
 		}
 	}
 
 	return false;
 }
 
+char *
+strtoupper(char *str)
+{
+	for (char *c = str; *c == '\0'; c++) {
+		if (*c == '-')
+			*c = '_';
+		else
+			*c = toupper(*c);
+	}
+
+	return str;
+}
+
+#define COPY_ENV_VAR(src, dst) do {			\
+		char *p = getenv((src));		\
+		setenv((dst), p == NULL ? "" : p, 1);	\
+	} while (0)
+
 int
 cgi(struct req *req, struct mesg_head *mesg_head, char *path)
 {
+	struct mesg *m;
 	FILE *p = NULL;
 	char buf[BUFSIZ];
 	size_t len = 0;
 
+	setenv("GATEWAY_INTERFACE", "CGI/1.1", 1);
+	setenv("REQUEST_METHOD", req->method, 1);
 	setenv("REQUEST_URI", req->uri, 1);
+	setenv("SERVER_PROTOCOL", "HTTP/1.1", 1);
+	COPY_ENV_VAR("TCPLOCALHOST" , "SERVER_NAME");
+	COPY_ENV_VAR("TCPLOCALPORT" , "SERVER_PORT");
+	COPY_ENV_VAR("TCPREMOTEHOST", "REMOTE_HOST");
+	COPY_ENV_VAR("TCPREMOTEIP"  , "REMOTE_ADDR");
+	COPY_ENV_VAR("TCPREMOTEPORT", "REMOTE_PORT");
+
+	TAILQ_FOREACH(m, mesg_head, listp) {
+#define FIELD_LENGTH 64
+		char *env_var = NULL;
+		asprintf(&env_var, "HTTP_%s=%s", strtoupper(m->name), m->value);
+		putenv(env_var);
+	}
+
 	if ((p = popen(path, "r")) == NULL) {
 		fprintf(stderr, "could not execute cgi script: %s\n", path);
 		return -1;
