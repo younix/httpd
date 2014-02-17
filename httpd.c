@@ -82,6 +82,28 @@ auth(char *path_file, struct mesg_head *mesg_head)
 	return false;
 }
 
+int
+cgi(struct req *req, struct mesg_head *mesg_head, char *path)
+{
+	FILE *p = NULL;
+	char buf[BUFSIZ];
+	size_t len = 0;
+
+	setenv("REQUEST_URI", req->uri, 1);
+	if ((p = popen(path, "r")) == NULL) {
+		fprintf(stderr, "could not execute cgi script: %s\n", path);
+		return -1;
+	}
+
+	printf("HTTP/1.1 200 OK\r\n");
+
+	while ((len = fread(buf, 1, sizeof buf, p)) > 0)
+		fwrite(buf, 1, len, stdout);
+
+	pclose(p);
+	return 0;
+}
+
 void
 method_get(struct req *req, struct mesg_head *mesg_head)
 {
@@ -110,7 +132,12 @@ method_get(struct req *req, struct mesg_head *mesg_head)
 	stat(path, &path_stat);
 	if (S_ISDIR(path_stat.st_mode)) {
 		fprintf(stderr, "just a path\n");
+	} else if (S_ISREG(path_stat.st_mode) && access(path, X_OK) == 0) {
+		fprintf(stderr, "CGI: '%s'!\n", path);
+		if (cgi(req, mesg_head, path) != 0)
+			error_response(500, "Internal Server Error", NULL);
 	} else if (S_ISREG(path_stat.st_mode)) {
+		fprintf(stderr, "get file: '%s'\n", path);
 		printf("HTTP/1.1 200 OK\r\n\r\n");
 		fflush(stdout);
 		int fd = open(path, O_RDONLY);
@@ -152,7 +179,6 @@ read_header(struct mesg_head *mesg_head, FILE *fh)
 		TAILQ_INSERT_TAIL(mesg_head, mesg, listp);
 	}
 
-	fprintf(stderr, "end of header!\n");
 	free(pmatch);
 
 	return 0;
