@@ -16,4 +16,4 @@ clean:
 	rm -f list-dir httpd httpd.core
 
 debug:
-	gdb httpd.core httpd
+	gdb httpd httpd.core
