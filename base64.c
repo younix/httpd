@@ -23,7 +23,7 @@ int base64decode(char *in, size_t inLen, unsigned char *out, size_t *outLen) {
 	size_t buf = 1, len = 0;
 
 	while (in < end) {
-		unsigned char c = d[*in++];
+		unsigned char c = d[(int)*in++];
 
 		switch (c) {
 		case WHITESPACE: continue;   /* skip whitespace */

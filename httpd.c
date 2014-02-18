@@ -84,6 +84,7 @@ auth(char *path_file, struct mesg_head *mesg_head)
 				setenv("REMOTE_USER", user, 1);
 				return true;
 			}
+			break; /* skip other fields */
 		}
 	}
 
