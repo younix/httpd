@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
-#include <login_cap.h>
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,15 +10,17 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <bsd/string.h>
+
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <bsd_auth.h>
 
 #include "httpd.h"
 #include "config.h"
 #include "base64.h"
+#include "auth.h"
 
 #define get_regex_match(buf, pmatch, pos) (			\
 	(pmatch)[(pos)].rm_so == -1 ? NULL :			\
@@ -75,7 +76,7 @@ auth(char *path_file, struct mesg_head *mesg_head)
 			if (user == NULL || pass == NULL)
 				return false;
 
-			if (auth_userokay(user, NULL, NULL, pass) != 0) {
+			if (user_auth(user, pass)) {
 				/* env. variables may used by CGI scripts */
 				setenv("AUTH_TYPE", "Basic", 1);
 				setenv("REMOTE_USER", user, 1);

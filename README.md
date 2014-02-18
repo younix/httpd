@@ -30,6 +30,9 @@ project is, to write a daemon that just implements the handling one protocol.
  * simpler source code
  * lesser maintenance
 
+## compile requirements
+ * install libbsd-dev or similar under GNU/Linx
+
 ## http features
 
 | Method  | Supported |
