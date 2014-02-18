@@ -10,7 +10,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef _GNU_SOURCE
 #include <bsd/string.h>
+#endif
 
 #include <sys/select.h>
 #include <sys/stat.h>

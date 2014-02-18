@@ -1,8 +1,9 @@
+#include <stdio.h>
+#include <stdbool.h>
+
 #ifdef BSD_AUTH
 #include <bsd_auth.h>
 #endif
-
-#include <stdbool.h>
 
 bool
 user_auth(char *user, char *pass)
