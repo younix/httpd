@@ -30,12 +30,11 @@ project is, to write a daemon that just implements the handling one protocol.
  * simpler source code
  * lesser maintenance
 
-## compile requirements
- * install libbsd-dev or similar under GNU/Linux
-
 ## Tested on
  * OpenBSD current
  * GNU/Linux (Debian)
+  * with package: libbsd-dev
+  * without authentication
 
 ## http features
 
