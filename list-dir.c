@@ -30,7 +30,8 @@ main(int argc, char**argv)
 	puts(DOCUMENT_HEADER);
 
 	while ((entry = readdir(dir)) != NULL) {
-		printf("\t<li>%s</li>\n", entry->d_name);
+		printf("\t<li><a href=\"%s\">%s</a></li>\n", entry->d_name,
+		    entry->d_name);
 	}
 
 	puts(DOCUMENT_FOOTER);
