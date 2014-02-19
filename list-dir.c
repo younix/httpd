@@ -42,7 +42,7 @@ main(int argc, char**argv)
 	return EXIT_SUCCESS;
  err:
 	if (errno != 0)
-		printf("XXX: error\n");
+		perror(argv[0]);
 
 	return EXIT_FAILURE;
 }
