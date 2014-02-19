@@ -1,3 +1,4 @@
+*.core
+*.o
 httpd
-httpd.core
 list-dir
